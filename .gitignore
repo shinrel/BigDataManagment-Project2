@@ -2,3 +2,5 @@
 *.csv
 *.txt
 *.xml
+/bin/
+src/
