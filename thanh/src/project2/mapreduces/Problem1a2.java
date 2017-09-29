@@ -35,9 +35,10 @@ public class Problem1a2 {
 
 		private final int SLICE_STEP = 1000; //divide the space 10000*10000 by 100 continuous slices. 
 		// each slice is a 1000*1000 square. 
-		// First slice is <0, 0, 1000, 1000>, second slice is <1000, 0, 2000, 1000>
-		// 10th slice is <9000, 0, 10000, 1000>
-		// 11th slice is <0>
+		// First slice is <0, 0, 1000, 1000>, second slice is <0, 1000, 1000, 2000>
+		// 10th slice is  <0, 9000, 1000, 10000>
+		// 11th slice is <1000,0, 2000, 1000> and 20th slice is <1000,9000,2000,10000> and so on
+		
 		private Vector<Rectangle> lstRecs = new Vector<>();
 		public void generateSliceSquares()
 		{
@@ -130,7 +131,7 @@ public class Problem1a2 {
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void run(String[] args) throws Exception {
 
 		Configuration conf = new Configuration();
 		String[] otherArgs = new GenericOptionsParser(conf, args)
