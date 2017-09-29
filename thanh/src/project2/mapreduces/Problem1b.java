@@ -29,10 +29,12 @@ import org.apache.hadoop.filecache.DistributedCache;
 import project2.obj.Point;
 import project2.obj.Rectangle;
 
-public class Problem1a2 {
-	public static class MyMapperProblem1a extends
+public class Problem1b {
+	public static class MyMapperProblem1b extends
 			Mapper<Object, Text, IntWritable, Text> {
 
+		private Rectangle W;
+		
 		private final int SLICE_STEP = 1000; //divide the space 10000*10000 by 100 continuous slices. 
 		// each slice is a 1000*1000 square. 
 		// First slice is <0, 0, 1000, 1000>, second slice is <0, 1000, 1000, 2000>
@@ -40,7 +42,7 @@ public class Problem1a2 {
 		// 11th slice is <1000,0, 2000, 1000> and 20th slice is <1000,9000,2000,10000> and so on
 		
 		private Vector<Rectangle> lstSlice = new Vector<>();
-		public void generateSliceSquares()
+		public void generateSliceSquares(Rectangle W)
 		{
 			int numXSlice = Point.MAX_SCALE/SLICE_STEP;
 			int numYSlice = Point.MAX_SCALE/SLICE_STEP;
@@ -59,8 +61,12 @@ public class Problem1a2 {
 				for (int j = 0; j < numYSlice; j++) {
 					Point bottomLeftPoint = new Point(x[i], y[j]);
 					Point topRightPoint = new Point(x[i], y[j] + SLICE_STEP);
-					lstSlice.add(new Rectangle(recId, bottomLeftPoint, topRightPoint));
-					recId += 1;
+					Rectangle rec = new Rectangle(recId, bottomLeftPoint, topRightPoint);
+					if (rec.isOverlapRectangle(W)) {
+						lstSlice.add(rec);
+						recId += 1;
+					}
+					
 				}
 			}
 		}
@@ -68,7 +74,8 @@ public class Problem1a2 {
 		@Override
 		public void setup(Context context) throws IOException,
 				InterruptedException {
-			generateSliceSquares();
+			W = new Rectangle(100001, new Point(0, 0), new Point(10000,10000));
+			generateSliceSquares(W);
 		}
 		
 
@@ -79,17 +86,20 @@ public class Problem1a2 {
 			if (tokens.length == 5) {
 				//rectangle file
 				Rectangle recFile = Rectangle.parseFromString(value.toString());
-				for (Rectangle rec : lstSlice) {
-					if (rec.isOverlapRectangle(recFile)) {
-						context.write(new IntWritable(rec.getRecId()), new Text(recFile.toString()));
+				for (Rectangle slice : lstSlice) {
+					if (slice.isOverlapRectangle(recFile) && 
+							recFile.isOverlapRectangle(W)) {
+						//consider only rectangles that overlap with W and squared slices.
+						context.write(new IntWritable(slice.getRecId()), new Text(recFile.toString()));
 					}
 				}
 			} else if(tokens.length == 2) {
 				//point file
 				Point p = Point.parseFromString(value.toString());
-				for (Rectangle slice : lstSlice) {
-					if (slice.containPoints(p)) {
-						context.write(new IntWritable(slice.getRecId()), new Text(p.toString()));
+				if (!W.containPoints(p)) return; //if point p not in W --> return
+				for (Rectangle rec : lstSlice) {
+					if (rec.containPoints(p)) {
+						context.write(new IntWritable(rec.getRecId()), new Text(p.toString()));
 					}
 				}
 			}
@@ -98,7 +108,7 @@ public class Problem1a2 {
 	}
 
 
-	public static class MyReducerProblem1a extends
+	public static class MyReducerProblem1b extends
 			Reducer<IntWritable, Text, IntWritable, Text> {
 		private IntWritable result = new IntWritable();
 
@@ -141,10 +151,10 @@ public class Problem1a2 {
 			System.exit(2);
 		}
 		Job job = new Job(conf, "Project 2, Problem 1a");
-		job.setJarByClass(Problem1a2.class); // change the class here
-		job.setMapperClass(MyMapperProblem1a.class);
+		job.setJarByClass(Problem1b.class); // change the class here
+		job.setMapperClass(MyMapperProblem1b.class);
 //		job.setCombinerClass(MyCombinerQuestion2d.class);
-		job.setReducerClass(MyReducerProblem1a.class);
+		job.setReducerClass(MyReducerProblem1b.class);
 		job.setMapOutputKeyClass(IntWritable.class);
 		job.setMapOutputValueClass(Text.class);
 		job.setOutputKeyClass(IntWritable.class);
