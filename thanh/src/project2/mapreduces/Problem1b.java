@@ -147,10 +147,10 @@ public class Problem1b {
 		String[] otherArgs = new GenericOptionsParser(conf, args)
 				.getRemainingArgs();
 		if (otherArgs.length < 2) {
-			System.err.println("Usage:  Problem1a [input] [output] ");
+			System.err.println("Usage:  Problem1b [input] [output] ");
 			System.exit(2);
 		}
-		Job job = new Job(conf, "Project 2, Problem 1a");
+		Job job = new Job(conf, "Project 2, Problem 1b");
 		job.setJarByClass(Problem1b.class); // change the class here
 		job.setMapperClass(MyMapperProblem1b.class);
 //		job.setCombinerClass(MyCombinerQuestion2d.class);
