@@ -107,7 +107,13 @@ public class Problem3Kmean5 {
 		@Override
 		protected void cleanup(Context context) throws IOException,
 				InterruptedException {
-
+			int i = 0;
+			for (Point p: centers) {
+				context.write(new IntWritable(i++), new Text(p.toString()));
+			}
+			if (context.getConfiguration().getBoolean("lastMapping5a", false)) {
+				context.write(new IntWritable(1), new Text("Stop"));
+			}
 		}
 
 		public void map(Object key, Text value, Context context)
@@ -121,6 +127,9 @@ public class Problem3Kmean5 {
 				context.write(new IntWritable(closestCenterIdx),
 						new Text(centers.get(closestCenterIdx).toString()
 								+ "\t" + p.toString()));
+			} else if (context.getConfiguration().getBoolean("lastMapping5a",
+					false)) {
+
 			} else {
 				context.write(new IntWritable(closestCenterIdx),
 						new Text(p.toString()));
@@ -266,6 +275,7 @@ public class Problem3Kmean5 {
 							+ "[max-iter] [distance-threshold] [5a/5b?]");
 			System.exit(1);
 		}
+		
 		// conf.set("centers-path", otherArgs[0]);
 		int max_iter = Integer.parseInt(otherArgs[3]);
 		float threshold = Float.parseFloat(otherArgs[4]);
@@ -343,15 +353,26 @@ public class Problem3Kmean5 {
 			} else if (question5ab.contains("5a")) {
 				// append to file:
 				if (i < max_iter) {
+					conf.setBoolean("lastMapping5a", true);
+					Job job = new Job(conf, "Project 3, Problem 3 last mapping");
+					job.setJarByClass(Problem3Kmean5.class); // change the class
+																// here
+					job.setMapperClass(MyMapperProblem3Kmean.class);
+					job.setMapOutputKeyClass(IntWritable.class);
+					job.setMapOutputValueClass(Text.class);
+					job.setNumReduceTasks(0);
+
 					String centersPath = otherArgs[2] + i;
 					centersPath = centersPath + "/part-r-00000";
-					logger.info("Append to : " + centersPath);
-					Path path = new Path(centersPath);
-					FileSystem fs = FileSystem.get(conf);
-					BufferedWriter br = new BufferedWriter(
-							new OutputStreamWriter(fs.append(path)));
-					br.append("Stop\n");
-					br.close();
+
+					DistributedCache.addCacheFile(new URI(centersPath),
+							job.getConfiguration());
+
+					FileInputFormat.addInputPath(job, new Path(otherArgs[1]));
+					FileOutputFormat.setOutputPath(job, new Path(otherArgs[2]
+							+ (i + 1)));
+
+					boolean res = job.waitForCompletion(true);
 				}
 
 			}

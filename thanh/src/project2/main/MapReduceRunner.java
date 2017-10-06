@@ -56,7 +56,7 @@ public class MapReduceRunner {
         
         
 		String[] jobs = {"1a", "1b", "2",  "3.2.1",
-				"3.2.2", "3.2.3", "3.2.4", "3.2.5", "3.2.6"};
+				"3.2.2", "3.2.3", "3.2.4", "3.2.5"};
 		if (args.length < 1) {
 			System.err.println("Usage [Job?] [input] [output]");
 			System.out.println("Available jobs:");
@@ -83,22 +83,23 @@ public class MapReduceRunner {
 			Problem3Step1.run(newArgs);
 		}*/
 		
-		if (args[0].equals(jobs[4])) {
-			logger.info("Running Kmean 1");
+		if (args[0].equals(jobs[3])) {
+			//logger.info("Running Kmean 1");
 			Problem3Kmean1.run(newArgs);
 		}
 		
-		if (args[0].equals(jobs[5])) {
+		if (args[0].equals(jobs[4])) {
 			Problem3Kmean2.run(newArgs);
 		}
-		if (args[0].equals(jobs[6])) {
-			logger.info("run kmean3");
+		if (args[0].equals(jobs[5])) {
+			//logger.info("run kmean3");
 			Problem3Kmean3.run(newArgs);
 		}
-		if (args[0].equals(jobs[7])) {
+		if (args[0].equals(jobs[6])) {
 			Problem3Kmean4.run(newArgs);
 		}
-		if (args[0].equals(jobs[8])) {
+		if (args[0].equals(jobs[7])) {
+			//for (String s : newArgs) logger.info(s);
 			Problem3Kmean5.run(newArgs);
 		}
 		/*
